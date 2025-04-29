@@ -1,16 +1,31 @@
 #!/usr/bin/env nu
 
-def main [] {
-  print "todo"
+
+let THIS_PROGRAM_NAME = "g"
+let CONFIG_FILE_NAME = "config.toml"
+
+
+def settings [] {
+  $env.XDG_CONFIG_DIRS | path join $THIS_PROGRAM_NAME | path join $CONFIG_FILE_NAME | from toml
 }
 
 
-def "main checkout" [branch: string, remote?: string] {
+def get_repo [] {
+  let user = ((settings) | get username)
+  let git_root = (git rev-parse --show-toplevel)
+  let project = $git_root | path basename
+
+  $"($user)/($project)"
+}
+
+def "main checkout" [branch: string, remote?: string, repo?: string] {
   let remote = ($remote | default "origin")
 
-  git checkout -b ($branch)
-  git push --set-upstream ($remote) ($branch)
-  let pr_url = (gh pr create --fill --draft)
+  let repo = ($repo | default (get_repo))
+
+  git checkout -b $branch
+  git push --set-upstream $remote $branch
+  let pr_url = (gh pr create --repo $repo --fill --draft)
   print $"pr_url"
 }
 
