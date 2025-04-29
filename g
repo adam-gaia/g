@@ -103,6 +103,7 @@ def "main pr" [--open, --no-open, --ready, repo?: string, remote?: string] {
 
 
 def "main ready" [] {
+  main update
   gh pr ready
 }
 
@@ -118,6 +119,7 @@ def reset_to_default_branch [--delete-current, default_branch?: string] {
 
 # Merge in-progress PR
 def "main merge" [] {
+  main update
   gh pr merge --merge --delete-branch
   # No need to reset to default branch, gh utility does that for us
 }
