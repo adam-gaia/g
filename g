@@ -28,7 +28,7 @@ def "main info" [] {
   print "TODO"
 }
 
-def "main checkout" [branch: string, remote?: string, repo?: string] {
+def "main checkout" [open: bool, branch: string, remote?: string, repo?: string] {
   let remote = ($remote | default "origin")
 
   let repo = ($repo | default (get_repo))
@@ -36,7 +36,12 @@ def "main checkout" [branch: string, remote?: string, repo?: string] {
   git checkout -b $branch
   git push --set-upstream $remote $branch
   let pr_url = (gh pr create --repo $repo --fill --draft)
-  print $pr_url
+
+  if $open {
+    xdg-open $pr_url
+  } else {
+    print $pr_url
+  }
 }
 
 
