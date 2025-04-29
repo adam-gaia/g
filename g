@@ -70,8 +70,8 @@ def "main pr" [--open, --no-open, --ready, branch?: string, repo?: string, remot
   let default_branch = ($settings | get default-branch)
   let current_branch = (get_current_branch)
 
-  if $current_branch != $default_branch {
-    print $"Not on default branch '($default_branch)'"
+  if $current_branch == $default_branch {
+    print $"Currently on default branch '($default_branch)'. Please checkout a feature branch. Refusing to open a PR"
     return 1
   }
 
