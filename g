@@ -65,7 +65,7 @@ def new_pr [ready: bool, repo?: string] {
   }
 }
 
-def "main pr" [--open, --no-open, --ready, branch?: string, repo?: string, remote?: string] {
+def "main pr" [--open, --no-open, --ready, repo?: string, remote?: string] {
   let settings = (get_settings)
   let default_branch = ($settings | get default-branch)
   let current_branch = (get_current_branch)
@@ -77,7 +77,7 @@ def "main pr" [--open, --no-open, --ready, branch?: string, repo?: string, remot
 
   let remote = ($remote | default "origin")
    
-  git push --set-upstream $remote $branch
+  git push --set-upstream $remote $current_branch
 
   let pr_url = (new_pr $ready)
 
