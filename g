@@ -75,6 +75,7 @@ def "main merge" [] {
 }
 
 
+
 def "main clean" [] {
   let settings = (get_settings)
   let default_branch = ($settings | get default-branch)
@@ -85,8 +86,13 @@ def "main clean" [] {
       return
   }
 
+  let closed = (gh pr view --json closed --jq '.closed')
+  if !closed {
+    print $"PR for current branch '($current_branch)' is still open. Refusing to delete local branch"
+    return 1
+  }
 
-
-
-
+  git checkout $default_branch
+  git pull 
+  git branch -d $current_branch
 }
