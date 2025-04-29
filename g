@@ -5,10 +5,12 @@ def main [] {
 }
 
 
-def "main checkout" [branch: string] {
-  git checkout -b "$(branch)"
-  git push --set-upstream "$(remote)" "$(branch)"
-  let pr_url = (gh pr create --fill --draft --json url | from json | get url)
+def "main checkout" [branch: string, remote?: string] {
+  let remote = ($remote | default "origin")
+
+  git checkout -b ($branch)
+  git push --set-upstream ($remote) ($branch)
+  let pr_url = (gh pr create --fill --draft)
   print $"pr_url"
 }
 
