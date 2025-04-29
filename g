@@ -53,10 +53,20 @@ def "main checkout" [branch: string, remote?: string, repo?: string] {
   git push --set-upstream $remote $branch
 }
 
-def "pr" [--open, --no-open, repo?: string] {
+def new_pr [--ready, repo?: string] {
   let settings = (get_settings)
   let repo = ($repo | default (get_repo $settings))
-  let pr_url = (gh pr create --repo $repo --fill --draft)
+
+  if $ready {
+    gh pr create --repo $repo --fill    
+  } else {
+    
+    gh pr create --repo $repo --fill --draft
+  }
+}
+
+def "pr" [--open, --no-open, --ready, repo?: string] {
+  let pr_url = (new_pr)
 
   if $open {
     xdg-open $pr_url
