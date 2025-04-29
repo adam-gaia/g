@@ -113,7 +113,7 @@ def reset_to_default_branch [--delete-current, default_branch?: string] {
 # Merge in-progress PR
 def "main merge" [] {
   gh pr merge --merge --delete-branch
-  reset_to_default_branch --delete-current
+  # No need to reset to default branch, gh utility does that for us
 }
 
 def pr_closed [] {
