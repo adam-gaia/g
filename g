@@ -28,10 +28,21 @@ def "main info" [] {
   print "TODO"
 }
 
-def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: string] {
-  let settings = get_settings
-  let remote = ($remote | default "origin")
+def current_branch [] {
+  git branch --show-current | str trim
+}
 
+def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: string] {
+  let settings = (get_settings)
+  let default_branch = ($settings | get default-branch)
+  let current_branch = (current_branch)
+
+  if $current_branch != $default_branch {
+    print $"Not on default branch '($default_branch)'"
+    return 1
+  }
+
+  let remote = ($remote | default "origin")
   let repo = ($repo | default (get_repo $settings))
 
   git checkout -b $branch
@@ -65,5 +76,17 @@ def "main merge" [] {
 
 
 def "main clean" [] {
-  print "todo"
+  let settings = (get_settings)
+  let default_branch = ($settings | get default-branch)
+  let current_branch = (current_branch)
+
+  if $current_branch == $default_branch {
+      print "Already on default branch, nothing to clean."
+      return
+  }
+
+
+
+
+
 }
