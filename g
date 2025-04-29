@@ -36,7 +36,7 @@ def get_default_branch [settings: any] {
   $settings | get default-branch
 }
 
-def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: string] {
+def "main checkout" [branch: string, remote?: string, repo?: string] {
   let settings = (get_settings)
   let default_branch = ($settings | get default-branch)
   let current_branch = (get_current_branch)
@@ -47,11 +47,39 @@ def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: 
   }
 
   let remote = ($remote | default "origin")
-  let repo = ($repo | default (get_repo $settings))
+  
 
   git checkout -b $branch
   git push --set-upstream $remote $branch
-  let pr_url = (gh pr create --repo $repo --fill --draft)
+}
+
+def new_pr [ready: bool, repo?: string] {
+  let settings = (get_settings)
+  let repo = ($repo | default (get_repo $settings))
+
+  if $ready {
+    gh pr create --repo $repo --fill    
+  } else {
+    
+    gh pr create --repo $repo --fill --draft
+  }
+}
+
+def "main pr" [--open, --no-open, --ready, repo?: string, remote?: string] {
+  let settings = (get_settings)
+  let default_branch = ($settings | get default-branch)
+  let current_branch = (get_current_branch)
+
+  if $current_branch == $default_branch {
+    print $"Currently on default branch '($default_branch)'. Please checkout a feature branch. Refusing to open a PR"
+    return 1
+  }
+
+  let remote = ($remote | default "origin")
+   
+  git push --set-upstream $remote $current_branch
+
+  let pr_url = (new_pr $ready)
 
   if $open {
     xdg-open $pr_url
@@ -65,8 +93,7 @@ def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: 
     } else {
       print $pr_url
     }
-  }
-}
+  }}
 
 
 def "main ready" [] {
