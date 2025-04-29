@@ -123,7 +123,7 @@ def "main merge" [] {
 }
 
 def pr_closed [] {
-  gh pr view --json closed --jq '.closed'
+  (gh pr view --json closed --jq '.closed') | from json
 }
 
 
