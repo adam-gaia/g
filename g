@@ -6,7 +6,7 @@ let CONFIG_FILE_NAME = "config.toml"
 
 
 def main [] {
-  main info
+  main status
 }
 
 
@@ -22,10 +22,6 @@ def get_repo [settings: any] {
   let project = $git_root | path basename
 
   $"($user)/($project)"
-}
-
-def "main info" [] {
-  main status
 }
 
 def "main status" [] {
