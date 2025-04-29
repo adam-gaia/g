@@ -83,13 +83,30 @@ def reset_to_default_branch [--delete-current, default_branch?: string] {
   git branch -d $current_branch  
 }
 
+# Merge in-progress PR
 def "main merge" [] {
   gh pr merge --merge --delete-branch
   reset_to_default_branch --delete-current
 }
 
+def pr_closed [] {
+  gh pr view --json closed --jq '.closed'
+}
 
 
+# Update in-progress PR
+def "main update" [] {
+  let current_branch = (get_current_branch)
+
+  if (pr_closed) {
+    print $"PR for current branch '($current_branch)' has been closed, cannot update"
+    return 1
+  }
+
+  git push
+}
+
+# Delete current feature branch (if pr has been merged)
 def "main clean" [] {
   let settings = (get_settings)
   let default_branch = (get_default_branch $settings)
@@ -100,8 +117,7 @@ def "main clean" [] {
       return
   }
 
-  let closed = (gh pr view --json closed --jq '.closed')
-  if !closed {
+  if !(pr_closed) {
     print $"PR for current branch '($current_branch)' is still open. Refusing to delete local branch"
     return 1
   }
