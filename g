@@ -65,8 +65,20 @@ def new_pr [ready: bool, repo?: string] {
   }
 }
 
-def "main pr" [--open, --no-open, --ready, repo?: string] {
+def "main pr" [--open, --no-open, --ready, branch?: string, repo?: string, remote?: string] {
   let settings = (get_settings)
+  let default_branch = ($settings | get default-branch)
+  let current_branch = (get_current_branch)
+
+  if $current_branch != $default_branch {
+    print $"Not on default branch '($default_branch)'"
+    return 1
+  }
+
+  let remote = ($remote | default "origin")
+   
+  git push --set-upstream $remote $branch
+
   let pr_url = (new_pr $ready)
 
   if $open {
