@@ -28,7 +28,7 @@ def "main info" [] {
   print "TODO"
 }
 
-def "main checkout" [--open, branch: string, remote?: string, repo?: string] {
+def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: string] {
   let settings = get_settings
   let remote = ($remote | default "origin")
 
@@ -42,7 +42,11 @@ def "main checkout" [--open, branch: string, remote?: string, repo?: string] {
     xdg-open $pr_url
   } else {
     if ($settings | get open-urls) {
-      xdg-open $pr_url
+      if $no_open {
+        print $pr_url
+      } else {
+        xdg-open $pr_url
+      }
     } else {
       print $pr_url
     }
