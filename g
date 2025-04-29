@@ -28,7 +28,7 @@ def "main info" [] {
   print "TODO"
 }
 
-def "main checkout" [open: bool, branch: string, remote?: string, repo?: string] {
+def "main checkout" [--open, branch: string, remote?: string, repo?: string] {
   let remote = ($remote | default "origin")
 
   let repo = ($repo | default (get_repo))
