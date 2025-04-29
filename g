@@ -65,7 +65,7 @@ def new_pr [ready: bool, repo?: string] {
   }
 }
 
-def "pr" [--open, --no-open, --ready, repo?: string] {
+def "main pr" [--open, --no-open, --ready, repo?: string] {
   let settings = (get_settings)
   let pr_url = (new_pr $ready)
 
