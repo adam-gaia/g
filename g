@@ -117,8 +117,20 @@ def reset_to_default_branch [--delete-current, default_branch?: string] {
   git branch -d $current_branch  
 }
 
+def is_dirty [] {
+  try {git diff --quiet --ignore-submodules HEAD} catch {
+    return true
+  }
+  return false
+}
+
 # Merge in-progress PR
 def "main merge" [] {
+  if (is_dirty) {
+    print "Dirty git status, bailing"
+    exit 1
+  }
+
   main update
   gh pr merge --merge --delete-branch
   # No need to reset to default branch, gh utility does that for us
@@ -135,7 +147,7 @@ def "main update" [] {
 
   if (pr_closed) {
     print $"PR for current branch '($current_branch)' has been closed, cannot update"
-    return 1
+    exit 1
   }
 
   git push
@@ -149,12 +161,12 @@ def "main clean" [] {
 
   if $current_branch == $default_branch {
       print "Already on default branch, nothing to clean."
-      return
+      exit 0
   }
 
   if !(pr_closed) {
     print $"PR for current branch '($current_branch)' is still open. Refusing to delete local branch"
-    return 1
+    exit 1
   }
 
   reset_to_default_branch --delete-current $default_branch
