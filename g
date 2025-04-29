@@ -75,7 +75,7 @@ def "main ready" [] {
 
 def reset_to_default_branch [--delete-current, default_branch?: string] {
   let settings = (get_settings) # TODO don't need to get settings if default_branch is passed
-  let default_branch = (default_branch | default (get_default_branch $settings))
+  let default_branch = ($default_branch | default (get_default_branch $settings))
   let current_branch = (get_current_branch)
 
   git checkout $default_branch
