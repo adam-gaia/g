@@ -30,7 +30,7 @@ def "main info" [] {
 
 def "main status" [] {
   let current_branch = (get_current_branch)
-  let pr_info = (gh pr view $current_branch --json number, state, isDraft, url | from json)
+  let pr_info = (gh pr view $current_branch --json number,state,isDraft,url | from json)
   let pr_number = $pr_info.number
   let pr_state = $pr_info.state
   let pr_draft = if $pr_info.isDraft == true { "draft" } else { "ready" }
