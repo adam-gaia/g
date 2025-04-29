@@ -6,7 +6,7 @@ let CONFIG_FILE_NAME = "config.toml"
 
 
 def main [] {
-  main info
+  main status
 }
 
 
@@ -24,8 +24,14 @@ def get_repo [settings: any] {
   $"($user)/($project)"
 }
 
-def "main info" [] {
-  print "TODO"
+def "main status" [] {
+  let current_branch = (get_current_branch)
+  let pr_info = (gh pr view $current_branch --json number,state,isDraft,url | from json)
+  let pr_number = $pr_info.number
+  let pr_state = $pr_info.state
+  let pr_draft = if $pr_info.isDraft == true { "draft" } else { "ready" }
+  let pr_url = $pr_info.url
+  print $"PR #($pr_number) is ($pr_state) and ($pr_draft): ($pr_url)"
 }
 
 def get_current_branch [] {
@@ -97,6 +103,7 @@ def "main pr" [--open, --no-open, --ready, repo?: string, remote?: string] {
 
 
 def "main ready" [] {
+  main update
   gh pr ready
 }
 
@@ -110,14 +117,27 @@ def reset_to_default_branch [--delete-current, default_branch?: string] {
   git branch -d $current_branch  
 }
 
+def is_dirty [] {
+  try {git diff --quiet --ignore-submodules HEAD} catch {
+    return true
+  }
+  return false
+}
+
 # Merge in-progress PR
 def "main merge" [] {
+  if (is_dirty) {
+    print "Dirty git status, bailing"
+    exit 1
+  }
+
+  main update
   gh pr merge --merge --delete-branch
   # No need to reset to default branch, gh utility does that for us
 }
 
 def pr_closed [] {
-  gh pr view --json closed --jq '.closed'
+  (gh pr view --json closed --jq '.closed') | from json
 }
 
 
@@ -127,7 +147,7 @@ def "main update" [] {
 
   if (pr_closed) {
     print $"PR for current branch '($current_branch)' has been closed, cannot update"
-    return 1
+    exit 1
   }
 
   git push
@@ -141,12 +161,12 @@ def "main clean" [] {
 
   if $current_branch == $default_branch {
       print "Already on default branch, nothing to clean."
-      return
+      exit 0
   }
 
   if !(pr_closed) {
     print $"PR for current branch '($current_branch)' is still open. Refusing to delete local branch"
-    return 1
+    exit 1
   }
 
   reset_to_default_branch --delete-current $default_branch
