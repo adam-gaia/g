@@ -25,7 +25,17 @@ def get_repo [settings: any] {
 }
 
 def "main info" [] {
-  print "TODO"
+  main status
+}
+
+def "main status" [] {
+  let current_branch = (get_current_branch)
+  let pr_info = (gh pr view $current_branch --json number, state, isDraft, url | from json)
+  let pr_number = $pr_info.number
+  let pr_state = $pr_info.state
+  let pr_draft = if $pr_info.isDraft == true { "draft" } else { "ready" }
+  let pr_url = $pr_info.url
+  print $"PR #($pr_number) is ($pr_state) and ($pr_draft): ($pr_url)"
 }
 
 def get_current_branch [] {
