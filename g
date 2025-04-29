@@ -12,7 +12,7 @@ def main [] {
 
 
 def settings [] {
-  $env.XDG_CONFIG_home | path join $THIS_PROGRAM_NAME | path join $CONFIG_FILE_NAME | from toml
+  $env.XDG_CONFIG_home | path join $THIS_PROGRAM_NAME | path join $CONFIG_FILE_NAME | open $in
 }
 
 
@@ -36,7 +36,7 @@ def "main checkout" [branch: string, remote?: string, repo?: string] {
   git checkout -b $branch
   git push --set-upstream $remote $branch
   let pr_url = (gh pr create --repo $repo --fill --draft)
-  print $"pr_url"
+  print $pr_url
 }
 
 
