@@ -36,7 +36,7 @@ def get_default_branch [settings: any] {
   $settings | get default-branch
 }
 
-def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: string] {
+def "main checkout" [branch: string, remote?: string, repo?: string] {
   let settings = (get_settings)
   let default_branch = ($settings | get default-branch)
   let current_branch = (get_current_branch)
@@ -47,10 +47,15 @@ def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: 
   }
 
   let remote = ($remote | default "origin")
-  let repo = ($repo | default (get_repo $settings))
+  
 
   git checkout -b $branch
   git push --set-upstream $remote $branch
+}
+
+def "pr" [--open, --no-open, repo?: string] {
+  let settings = (get_settings)
+  let repo = ($repo | default (get_repo $settings))
   let pr_url = (gh pr create --repo $repo --fill --draft)
 
   if $open {
@@ -65,8 +70,7 @@ def "main checkout" [--open, --no_open, branch: string, remote?: string, repo?: 
     } else {
       print $pr_url
     }
-  }
-}
+  }}
 
 
 def "main ready" [] {
