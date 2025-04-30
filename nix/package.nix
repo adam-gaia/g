@@ -1,5 +1,4 @@
-{ pkgs }: let
-
+{pkgs}: let
   buildNushellScript = let
     nu = "${pkgs.nushell}/bin/nu";
   in
@@ -18,8 +17,7 @@
         executable = true;
       };
 
-  name = "g";
-  contents = builtins.readFile ../g;
-
+  name = "pr";
+  contents = builtins.readFile ../pr;
 in
-buildNushellScript {inherit name contents; }
+  buildNushellScript {inherit name contents;}
