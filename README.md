@@ -19,6 +19,6 @@ default-branch = "main"
 
 ## Tips & Tricks
 - Note that the name 'pr' conflicts with a [similarly named tool in the coreutils](https://manpages.org/pr).
-On my NixOS system, Coreutils ends up on the $PATH first, so something needs to be done.
+On my NixOS system, the coreutils end up on the $PATH first, so something needs to be done.
 I've elected to prepend my 'pr' to the path with home-manager's `home.sessionPath`, but a simple `export PATH="/path/to/this/pr:${PATH}"` will do.
 
