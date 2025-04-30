@@ -100,7 +100,7 @@ def "main new" [--open, --no-open, --ready, pr_name: string, remote?: string] {
   let current_branch = (get_current_branch)
 
   if $current_branch == $default_branch {
-    let branch = ($pr_name | str trim | str replace -r '\s+' '_' | replace ':' '/')
+    let branch = ($pr_name | str trim | str replace -r '\s+' '_' | str replace ':' '/')
     let remote = ($remote | default "origin")
 
     print "Creating new feature branch..."
