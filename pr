@@ -176,3 +176,10 @@ def "main clean" [] {
 
   reset_to_default_branch --delete-current $default_branch
 }
+
+def "main open" [] {
+  let current_branch = (get_current_branch)
+  let pr_number = (get_pr_number $current_branch)
+  let url = (gh pr view $pr_number --json url) 
+  xdg-open $url
+}
