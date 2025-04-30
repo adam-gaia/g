@@ -9,7 +9,8 @@ def main [] {
   main status
 }
 
-
+# We can't rely on current branch names alone for operations like 'gh pr ...' (i think if the branch name has a '/' gh gets confused)
+# so this function gets the PR number from the branch name so we can do 'gh pr merge X'
 def get_pr_number [current_branch: string]: nothing -> int {
    gh pr list  --json headRefName,number | from json | filter {|x| $x.headRefName == $current_branch} | get number | first
 }
@@ -30,7 +31,8 @@ def get_repo [settings: any] {
 
 def "main status" [] {
   let current_branch = (get_current_branch)
-  let pr_info = (gh pr view $current_branch --json number,state,isDraft,url | from json)
+  let pr_number = (get_pr_number $current_branch)
+  let pr_info = (gh pr $pr_number view $current_branch --json number,state,isDraft,url | from json)
   let pr_number = $pr_info.number
   let pr_state = $pr_info.state
   let pr_draft = if $pr_info.isDraft == true { "draft" } else { "ready" }
@@ -108,7 +110,9 @@ def "main pr" [--open, --no-open, --ready, repo?: string, remote?: string] {
 
 def "main ready" [] {
   main update
-  gh pr ready
+  let current_branch = (get_current_branch)
+  let pr_number = (get_pr_number $current_branch)
+  gh pr ready $pr_number
 }
 
 def reset_to_default_branch [--delete-current, default_branch?: string] {
@@ -136,21 +140,24 @@ def "main merge" [] {
   }
 
   main update
-  gh pr merge --merge --delete-branch
+
+  let current_branch = (get_current_branch)
+  let pr_number = (get_pr_number $current_branch)
+  gh pr merge $pr_number --merge --delete-branch
   # No need to reset to default branch, gh utility does that for us
 }
 
-def pr_closed [] {
-  (gh pr view --json closed --jq '.closed') | from json
+def pr_closed [pr_number: int] {
+  (gh pr view $pr_number --json closed --jq '.closed') | from json
 }
 
 
 # Update in-progress PR
 def "main update" [] {
   let current_branch = (get_current_branch)
-
-  if (pr_closed) {
-    print $"PR for current branch '($current_branch)' has been closed, cannot update"
+  let pr_number = (get_pr_number $current_branch)
+  if (pr_closed $pr_number) {
+    print $"PR #($pr_number) for current branch '($current_branch)' has been closed, cannot update"
     exit 1
   }
 
@@ -168,8 +175,10 @@ def "main clean" [] {
       exit 0
   }
 
-  if !(pr_closed) {
-    print $"PR for current branch '($current_branch)' is still open. Refusing to delete local branch"
+  let pr_number = (get_pr_number $current_branch)
+
+  if !(pr_closed $pr_number) {
+    print $"PR #($pr_number) for current branch '($current_branch)' is still open. Refusing to delete local branch"
     exit 1
   }
 
