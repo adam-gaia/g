@@ -10,6 +10,7 @@ def get_pr_number [current_branch: string]: nothing -> int {
 }
 
 def get_settings [] {
+  # TODO: nice error message if config dir/file doesn't exist
   $env.XDG_CONFIG_home | path join $THIS_PROGRAM_NAME | path join $CONFIG_FILE_NAME | open $in
 }
 
@@ -29,15 +30,15 @@ def get_default_branch [settings: any] {
   $settings | get default-branch
 }
 
-def new_pr [ready: bool, repo?: string] {
+def new_pr [ready: bool, title: string, repo?: string] {
   let settings = (get_settings)
   let repo = ($repo | default (get_repo $settings))
 
   if $ready {
-    gh pr create --repo $repo --fill    
+    gh pr create --repo $repo --title $title --fill    
   } else {
     
-    gh pr create --repo $repo --fill --draft
+    gh pr create --repo $repo --title $title --fill --draft
   }
 }
 
@@ -93,34 +94,21 @@ def "main status" [] {
   print $"PR #($pr_number) is ($pr_state) and ($pr_draft): ($pr_url)"
 }
 
-def "main new" [branch: string, remote?: string, repo?: string] {
-  let settings = (get_settings)
-  let default_branch = ($settings | get default-branch)
-  let current_branch = (get_current_branch)
-
-  if $current_branch != $default_branch {
-    # TODO: do we care? Maybe delete this guard
-    print $"Not on default branch '($default_branch)'"
-    return 1
-  }
-
-  let remote = ($remote | default "origin")
-
-  git checkout -b $branch
-  git push --set-upstream $remote $branch
-}
-
-def "main pr" [--open, --no-open, --ready, repo?: string, remote?: string] {
+def "main new" [--open, --no-open, --ready, pr_name: string, remote?: string] {
   let settings = (get_settings)
   let default_branch = ($settings | get default-branch)
   let current_branch = (get_current_branch)
 
   if $current_branch == $default_branch {
-    print $"Currently on default branch '($default_branch)'. Please checkout a feature branch. Refusing to open a PR"
-    return 1
+    let branch = ($pr_name | str trim | str replace -r '\s+' '_' | replace ':' '/')
+    let remote = ($remote | default "origin")
+
+    print "Creating new feature branch..."
+    git checkout -b $branch
+    git push --set-upstream $remote $branch
   }
 
-  let pr_url = (new_pr $ready)
+  let pr_url = (new_pr $ready $pr_name)
 
   if $open {
     xdg-open $pr_url
