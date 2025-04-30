@@ -4,7 +4,7 @@
 let THIS_PROGRAM_NAME = "g"
 let CONFIG_FILE_NAME = "config.toml"
 
-
+# Small utility for automating the git+gh commands in the github flow
 def main [] {
   main status
 }
