@@ -136,7 +136,7 @@ def "main merge" [] {
 
   let current_branch = (get_current_branch)
   let pr_number = (get_pr_number $current_branch)
-  gh pr merge $pr_number --merge --delete-branch
+  gh pr merge $pr_number --auto --merge --delete-branch
   # No need to reset to default branch, gh utility does that for us
 }
 
