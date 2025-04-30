@@ -30,7 +30,15 @@ def get_repo [settings: any] {
 }
 
 def "main status" [] {
+  let settings = (get_settings)
+  let default_branch = (get_default_branch $settings)
   let current_branch = (get_current_branch)
+
+  if ($current_branch) == ($default_branch) {
+    gh pr list
+    exit 0
+  }
+
   let pr_number = (get_pr_number $current_branch)
   let pr_info = (gh pr $pr_number view $current_branch --json number,state,isDraft,url | from json)
   let pr_number = $pr_info.number
