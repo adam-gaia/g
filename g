@@ -10,6 +10,10 @@ def main [] {
 }
 
 
+def get_pr_number [current_branch: string]: nothing -> int {
+   gh pr list  --json headRefName,number | from json | filter {|x| $x.headRefName == $current_branch} | get number | first
+}
+
 
 def get_settings [] {
   $env.XDG_CONFIG_home | path join $THIS_PROGRAM_NAME | path join $CONFIG_FILE_NAME | open $in
